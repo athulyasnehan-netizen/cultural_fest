@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Cultural Fest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border: none; border-radius: 0.75rem; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="fw-bold mb-0"><i class="fa-solid fa-user-plus me-2 text-danger"></i>New Student & Event Registration</h2>
+                        <a href="/" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>Back Home</a>
+                    </div>
+                    
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">{{ error }}</div>
+                    {% endif %}
+
+                    <form action="/register_student" method="POST" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Student ID</label>
+                            <input type="text" class="form-control" name="student_id" placeholder="e.g. STU110" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">First Name</label>
+                            <input type="text" class="form-control" name="first_name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Middle Name</label>
+                            <input type="text" class="form-control" name="m_name">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input type="text" class="form-control" name="phone_no" maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select class="form-select" name="gender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Date of Birth</label>
+                            <input type="date" class="form-control" name="dob">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Age</label>
+                            <input type="number" class="form-control" name="age">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Year of Study</label>
+                            <input type="number" class="form-control" name="year" placeholder="1-4">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Department</label>
+                            <select class="form-select" name="dept_id" required>
+                                {% for d in departments %}
+                                    <option value="{{ d.dept_id }}">{{ d.dept_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Select Event to Register</label>
+                            <select class="form-select" name="event_id" required>
+                                {% for ev in events %}
+                                    <option value="{{ ev.event_id }}">{{ ev.event_name }} ({{ ev.category }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 mt-4 text-center">
+                            <button type="submit" class="btn btn-danger px-5 py-2 fw-semibold">Complete Registration</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

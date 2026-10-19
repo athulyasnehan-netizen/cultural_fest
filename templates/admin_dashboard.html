@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - FestPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { min-height: 100vh; background-color: #212529; color: white; position: fixed; width: 250px; top: 0; left: 0; padding-top: 2rem; }
+        .sidebar .nav-link { color: #adb5bd; padding: 0.75rem 1.25rem; margin-bottom: 0.25rem; border-radius: 0.375rem; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #dc3545; color: white; }
+        .main-content { margin-left: 250px; padding: 2rem; }
+        .card { border: none; border-radius: 0.75rem; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1); }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar d-flex flex-column p-3">
+        <h3 class="text-center fw-bold mb-4"><i class="fa-solid fa-user-shield me-2 text-danger"></i>Admin Panel</h3>
+        <ul class="nav nav-pills flex-column mb-auto" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active w-100 text-start" data-bs-toggle="pill" data-bs-target="#events" type="button" role="tab"><i class="fa-solid fa-calendar-days me-2"></i>Manage Events</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link w-100 text-start" data-bs-toggle="pill" data-bs-target="#students" type="button" role="tab"><i class="fa-solid fa-users me-2"></i>Manage Students</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link w-100 text-start" data-bs-toggle="pill" data-bs-target="#judges" type="button" role="tab"><i class="fa-solid fa-gavel me-2"></i>Manage Judges</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link w-100 text-start" data-bs-toggle="pill" data-bs-target="#coords" type="button" role="tab"><i class="fa-solid fa-user-tie me-2"></i>Coordinators</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link w-100 text-start" data-bs-toggle="pill" data-bs-target="#results" type="button" role="tab"><i class="fa-solid fa-trophy me-2"></i>Result Entry</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link w-100 text-start" data-bs-toggle="pill" data-bs-target="#regs" type="button" role="tab"><i class="fa-solid fa-file-lines me-2"></i>Registrations</button>
+            </li>
+        </ul>
+        <hr>
+        <a href="/" class="btn btn-outline-light w-100"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Logout</a>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="tab-content">
+            
+            <!-- Events Tab -->
+            <div class="tab-pane fade show active" id="events" role="tabpanel">
+                <h2 class="fw-bold mb-4">Manage Events</h2>
+                <div class="card p-4 mb-4">
+                    <h5 class="fw-bold mb-3">Add New Event</h5>
+                    <form action="/admin/add_event" method="POST" class="row g-3">
+                        <div class="col-md-3"><input type="text" class="form-control" name="event_id" placeholder="Event ID e.g. EVT105" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="event_name" placeholder="Event Name" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="category" placeholder="Category" required></div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="venue_id" required>
+                                <option value="">Select Venue</option>
+                                {% for v in venues %}
+                                    <option value="{{ v.venue_id }}">{{ v.venue_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3"><input type="date" class="form-control" name="date" required></div>
+                        <div class="col-md-3"><input type="time" class="form-control" name="time" required></div>
+                        <div class="col-md-6"><input type="text" class="form-control" name="description" placeholder="Description"></div>
+                        <div class="col-12"><button type="submit" class="btn btn-danger px-4">Create Event</button></div>
+                    </form>
+                </div>
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3">Existing Events</h5>
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Event ID</th><th>Event Name</th><th>Category</th><th>Date</th><th>Time</th><th>Venue ID</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ev in events %}
+                                <tr>
+                                    <td class="fw-semibold">{{ ev.event_id }}</td>
+                                    <td>{{ ev.event_name }}</td>
+                                    <td>{{ ev.category }}</td>
+                                    <td>{{ ev.date }}</td>
+                                    <td>{{ ev.time }}</td>
+                                    <td>{{ ev.venue_id or 'None' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editEventModal{{ ev.event_id }}"><i class="fa-solid fa-pen"></i></button>
+                                        <form action="/admin/delete_event/{{ ev.event_id }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete event?');"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Event Modal -->
+                                <div class="modal fade" id="editEventModal{{ ev.event_id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form action="/admin/edit_event/{{ ev.event_id }}" method="POST">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold">Edit Event: {{ ev.event_id }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Event Name</label>
+                                                        <input type="text" class="form-control" name="event_name" value="{{ ev.event_name }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Category</label>
+                                                        <input type="text" class="form-control" name="category" value="{{ ev.category }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Date</label>
+                                                        <input type="date" class="form-control" name="date" value="{{ ev.date }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Time</label>
+                                                        <input type="time" class="form-control" name="time" value="{{ ev.time }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Venue</label>
+                                                        <select class="form-select" name="venue_id" required>
+                                                            {% for v in venues %}
+                                                                <option value="{{ v.venue_id }}" {% if ev.venue_id == v.venue_id %}selected{% endif %}>{{ v.venue_name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Description</label>
+                                                        <textarea class="form-control" name="description">{{ ev.description }}</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Students Tab -->
+            <div class="tab-pane fade" id="students" role="tabpanel">
+                <h2 class="fw-bold mb-4">Manage Students</h2>
+                <div class="card p-4 mb-4">
+                    <h5 class="fw-bold mb-3">Add Student</h5>
+                    <form action="/admin/add_student" method="POST" class="row g-3">
+                        <div class="col-md-3"><input type="text" class="form-control" name="student_id" placeholder="Student ID" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="first_name" placeholder="First Name" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="last_name" placeholder="Last Name" required></div>
+                        <div class="col-md-3"><input type="email" class="form-control" name="email" placeholder="Email Address" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="phone_no" maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits" placeholder="Phone Number" required></div>
+                        <div class="col-md-3"><input type="number" class="form-control" name="year" placeholder="Year"></div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="dept_id" required>
+                                <option value="">Select Department</option>
+                                {% for d in departments %}
+                                    <option value="{{ d.dept_id }}">{{ d.dept_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12"><button type="submit" class="btn btn-danger px-4">Add Student</button></div>
+                    </form>
+                </div>
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3">Registered Students</h5>
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Year</th><th>Dept</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for s in students %}
+                                <tr>
+                                    <td class="fw-semibold">{{ s.student_id }}</td>
+                                    <td>{{ s.first_name }} {{ s.last_name }}</td>
+                                    <td>{{ s.email }}</td>
+                                    <td>{{ s.phone_no }}</td>
+                                    <td>{{ s.year }}</td>
+                                    <td>{{ s.dept_id }}</td>
+                                    <td>
+                                        <form action="/admin/delete_student/{{ s.student_id }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete student?');"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Judges Tab -->
+            <div class="tab-pane fade" id="judges" role="tabpanel">
+                <h2 class="fw-bold mb-4">Manage Judges</h2>
+                <div class="card p-4 mb-4">
+                    <h5 class="fw-bold mb-3">Add Judge</h5>
+                    <form action="/admin/add_judge" method="POST" class="row g-3">
+                        <div class="col-md-3"><input type="text" class="form-control" name="first_name" placeholder="First Name" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="last_name" placeholder="Last Name" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="qualification" placeholder="Qualification" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="phone_no" placeholder="Phone Number" required></div>
+                        <div class="col-12"><button type="submit" class="btn btn-danger px-4">Add Judge</button></div>
+                    </form>
+                </div>
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3">Existing Judges</h5>
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr><th>Judge ID</th><th>Name</th><th>Qualification</th><th>Phone</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for j in judges %}
+                                <tr>
+                                    <td class="fw-semibold">{{ j.judge_id }}</td>
+                                    <td>{{ j.first_name }} {{ j.last_name }}</td>
+                                    <td>{{ j.qualification }}</td>
+                                    <td>{{ j.phone_no }}</td>
+                                    <td>
+                                        <form action="/admin/delete_judge/{{ j.judge_id }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete judge?');"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Coordinators Tab -->
+            <div class="tab-pane fade" id="coords" role="tabpanel">
+                <h2 class="fw-bold mb-4">Event Coordinators</h2>
+                <div class="card p-4 mb-4">
+                    <h5 class="fw-bold mb-3">Assign Coordinator</h5>
+                    <form action="/admin/add_coordinator" method="POST" class="row g-3">
+                        <div class="col-md-3">
+                            <select class="form-select" name="student_id" required>
+                                <option value="">Select Student</option>
+                                {% for s in students %}
+                                    <option value="{{ s.student_id }}">{{ s.first_name }} {{ s.last_name }} ({{ s.student_id }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="event_id" required>
+                                <option value="">Select Event</option>
+                                {% for ev in events %}
+                                    <option value="{{ ev.event_id }}">{{ ev.event_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="role" placeholder="Role" required></div>
+                        <div class="col-md-3"><input type="text" class="form-control" name="responsibility" placeholder="Responsibility" required></div>
+                        <div class="col-12 mt-3"><button type="submit" class="btn btn-danger px-4">Assign</button></div>
+                    </form>
+                </div>
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3">Assigned Coordinators</h5>
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Coordinator ID</th>
+                                <th>Student Name</th>
+                                <th>Department</th>
+                                <th>Event Name</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in coordinators %}
+                                <tr>
+                                    <td class="fw-semibold">{{ c.coordinator_id }}</td>
+                                    <td>{{ c.student.first_name }} {{ c.student.last_name }}</td>
+                                    <td>
+                                        {% for d in departments %}
+                                            {% if d.dept_id == c.student.dept_id %}{{ d.dept_name }}{% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ c.event.event_name if c.event else c.event_id }}</td>
+                                    <td>{{ c.role }}</td>
+                                    <td>
+                                        <form action="/admin/delete_coordinator/{{ c.coordinator_id }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete coordinator?');"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Result Entry Tab -->
+            <div class="tab-pane fade" id="results" role="tabpanel">
+                <h2 class="fw-bold mb-4">Result Entry & Championship Points</h2>
+                <div class="card p-4 mb-4">
+                    <h5 class="fw-bold mb-3">Publish Result</h5>
+                    <form action="/admin/add_result" method="POST" class="row g-3">
+                        <div class="col-md-3">
+                            <select class="form-select" name="event_id" required>
+                                <option value="">Select Event</option>
+                                {% for ev in events %}
+                                    <option value="{{ ev.event_id }}">{{ ev.event_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="registration_id" required>
+                                <option value="">Select Participant Registration</option>
+                                {% for r in registrations %}
+                                    <option value="{{ r.registration_id }}">{{ r.registration_id }} - {{ r.student.first_name }} {{ r.student.last_name if r.student else r.student_id }} (Evt: {{ r.event_id }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2"><input type="number" step="0.01" class="form-control" name="score" placeholder="Score" required></div>
+                        <div class="col-md-2"><input type="number" class="form-control" name="ranking" placeholder="Ranking (1=10pts)" required></div>
+                        <div class="col-md-2"><button type="submit" class="btn btn-danger w-100">Publish</button></div>
+                    </form>
+                </div>
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3">Published Results</h5>
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Result ID</th>
+                                <th>Event ID</th>
+                                <th>Student Name</th>
+                                <th>Department</th>
+                                <th>Score</th>
+                                <th>Ranking</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in results %}
+                                <tr>
+                                    <td class="fw-semibold">{{ res.result_id }}</td>
+                                    <td>{{ res.event_id }}</td>
+                                    <td>
+                                        {% if res.registration and res.registration.student %}
+                                            {{ res.registration.student.first_name }} {{ res.registration.student.last_name }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if res.registration and res.registration.student %}
+                                            {% for d in departments %}
+                                                {% if d.dept_id == res.registration.student.dept_id %}{{ d.dept_name }}{% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ res.score }}</td>
+                                    <td><span class="badge bg-success">Rank {{ res.ranking }}</span></td>
+                                    <td>
+                                        <form action="/admin/delete_result/{{ res.result_id }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete result?');"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Registrations Tab -->
+            <div class="tab-pane fade" id="regs" role="tabpanel">
+                <h2 class="fw-bold mb-4">Participant Registrations</h2>
+                <div class="card p-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr><th>Reg ID</th><th>Student Name</th><th>Event Name</th><th>Date</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in registrations %}
+                                <tr>
+                                    <td class="fw-semibold">{{ reg.registration_id }}</td>
+                                    <td>{{ reg.student.first_name if reg.student else reg.student_id }} {{ reg.student.last_name if reg.student else '' }}</td>
+                                    <td>{{ reg.event.event_name }}</td>
+                                    <td>{{ reg.registration_date }}</td>
+                                    <td><span class="badge bg-primary">{{ reg.payment_status }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FestPortal - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .hero-section {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+        .card { border: none; border-radius: 0.75rem; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1); }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+      <div class="container">
+        <a class="navbar-brand fw-bold fs-4" href="/"><i class="fa-solid fa-masks-theater me-2"></i>FestPortal</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-align nav ms-auto align-items-center">
+            <li class="nav-item me-2">
+              <a href="/" class="nav-link text-white"><i class="fa-solid fa-house me-1"></i> Home</a>
+            </li>
+            <!-- Sign In button (opens Portal Login for Admin & Student) -->
+            <li class="nav-item me-2">
+              <a href="/login" class="btn btn-outline-light btn-sm px-3 fw-semibold">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Sign In
+              </a>
+            </li>
+            <!-- Student Sign Up -->
+            <li class="nav-item">
+              <a href="/register_student" class="btn btn-primary btn-sm px-3 fw-semibold">
+                <i class="fa-solid fa-user-plus me-1"></i> Student Sign Up
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Hero Banner Section -->
+        <div class="hero-section">
+            <h1 class="fw-bold display-5 mb-3">Cultural Fest Management System</h1>
+            <p class="lead mb-4">Centralized digital platform automating event scheduling, participant registrations, live judging scores, and department championship tracking.</p>
+            <div>
+                <a href="/login" class="btn btn-light btn-lg me-2 text-primary fw-semibold"><i class="fa-solid fa-right-to-bracket me-2"></i>Sign In to Portal</a>
+                <a href="/register_student" class="btn btn-outline-light btn-lg fw-semibold"><i class="fa-solid fa-user-plus me-2"></i>New Student? Sign Up</a>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="row g-4">
+            <!-- Upcoming Events List -->
+            <div class="col-lg-8">
+                <div class="card p-4">
+                    <h3 class="fw-bold mb-4 text-dark"><i class="fa-solid fa-calendar-day text-primary me-2"></i>Upcoming Events</h3>
+                    <div class="row g-3">
+                        {% for ev in events %}
+                            <div class="col-12">
+                                <div class="border rounded p-3 d-flex justify-content-between align-items-center bg-white shadow-sm">
+                                    <div>
+                                        <h5 class="fw-bold mb-1">{{ ev.event_name }}</h5>
+                                        <p class="text-muted small mb-1">{{ ev.description or 'No description available.' }}</p>
+                                        <small class="text-secondary">
+                                            <i class="fa-regular fa-clock me-1"></i>Date: {{ ev.date }} | Time: {{ ev.time }}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-primary px-3 py-2 fs-6">{{ ev.category }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No events published yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Championship Leaderboard -->
+            <div class="col-lg-4">
+                <div class="card p-4">
+                    <h3 class="fw-bold mb-4 text-dark"><i class="fa-solid fa-trophy text-warning me-2"></i>Leaderboard</h3>
+                    <ul class="list-group list-group-flush">
+                        {% for dept in departments %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-0">
+                                <div>
+                                    <span class="fw-bold text-dark me-2">{{ loop.index }}.</span>
+                                    <span class="fw-semibold">{{ dept.dept_name }}</span>
+                                </div>
+                                <span class="badge bg-success rounded-pill px-3 py-2 fs-6">{{ dept.championship_points or 0 }} pts</span>
+                            </li>
+                        {% else %}
+                            <p class="text-muted">No department points recorded yet.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FestPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border: none; border-radius: 0.75rem; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); }
+    </style>
+</head>
+<body>
+
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="col-md-5">
+            <div class="card p-4">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold"><i class="fa-solid fa-right-to-bracket text-primary me-2"></i>Portal Login</h3>
+                    <p class="text-muted">Sign in to your Student or Admin account</p>
+                </div>
+
+                {% if error %}
+                    <div class="alert alert-danger" role="alert">{{ error }}</div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Select Role</label>
+                        <select class="form-select" name="role" id="roleSelect" required>
+                            <option value="student">Student</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="usernameLabel">Student ID or Email</label>
+                        <input type="text" class="form-control" name="username" placeholder="Enter ID/Email/Username" required>
+                    </div>
+                    <div class="mb-3" id="passwordGroup">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" name="password" placeholder="Enter password (if admin)">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Login</button>
+                </form>
+
+                <div class="text-center mt-4 border-top pt-3">
+                    <p class="small text-muted mb-2">New here?</p>
+                    <a href="/register_student" class="text-decoration-none me-3"><i class="fa-solid fa-user-plus me-1"></i>Student Sign Up</a>
+                    <a href="/register_admin" class="text-decoration-none"><i class="fa-solid fa-user-shield me-1"></i>Admin Sign Up</a>
+                </div>
+                <div class="text-center mt-2">
+                    <a href="/" class="text-decoration-none text-secondary small"><i class="fa-solid fa-house me-1"></i>Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple script to adjust labels based on selected role
+        const roleSelect = document.getElementById('roleSelect');
+        const usernameLabel = document.getElementById('usernameLabel');
+        
+        roleSelect.addEventListener('change', function() {
+            if (this.value === 'admin') {
+                usernameLabel.textContent = 'Admin Username or Email';
+            } else {
+                usernameLabel.textContent = 'Student ID or Email';
+            }
+        });
+    </script>
+</body>
+</html>
